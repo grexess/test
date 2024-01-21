@@ -1,0 +1,4 @@
+{
+    "testing.automaticallyOpenPeekView": "never",
+    "deepscan.enable": true
+}

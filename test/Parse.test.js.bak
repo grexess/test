@@ -1,0 +1,176 @@
+import { describe, it, expect, beforeAll } from "vitest";
+import { deleteEvent, getUser, createUser, deleteUser, assignUserTo_wrOrganizer_Role } from "./utils/ParseHelper";
+
+// WeReace-DEV
+//const PARSE_SERVER_URL = "https://parseapi.back4app.com/";
+//const PARSE_APP_ID = "l7WoT8L1Edgc5pRYPhyyV0jgw0CGoDCFkXcaeWUD";
+//const PARSE_JAVASCRIPT_ID = "9azLGENrQGXhCQnzBk9tDKpljBKSQvOXgwNRyhUj";
+//const PARSE_MASTER_KEY = "9azLGENrQGXhCQnzBk9tDKpljBKSQvOXgwNRyhUj";
+//const PARSE_WSS_URL = "wss://werace-d.b4a.app/";
+// WeReace-TEST
+const PARSE_SERVER_URL = "https://parseapi.back4app.com/";
+const PARSE_APP_ID = "nRQrdWGmyjLgMmL9UPl4gvsGq9kr2dVJTQKxlcz2";
+const PARSE_JAVASCRIPT_ID = "n6PZug3p1Q0HuxLlyorrLelpj3yjlKAX6iX2V4XP";
+const PARSE_MASTER_KEY = "JhUiwH6Yx3xN6TFcplqEabY1AlZ5z8kc8SEii0m5";
+const PARSE_WSS_URL = "wss://werace-d.b4a.app/";
+
+import Parse from "parse/dist/parse.min.js";
+
+const EVENT_NAME = "TEST_WrEvent";
+const STAGE_NAME = "FirstStage";
+const STAGE_TRY_COUNT = 2;
+const STAGE_TYPE = 1;
+const RESULTKEEPING = 0;
+const TIMEKEEPER_START_PIN = "111111";
+const TIMEKEEPER_TARGET_PIN = "222222";
+
+const AMOUNT_REGISTRANTS = 10;
+
+const FIELD_MAP = new Map([
+  ["eMail", "email"],
+  ["Startnummer", "StartNumber"],
+  ["Starterklasse", "ageGroup"],
+  ["Name", "firstName"],
+  ["Nachname", "lastName"],
+  ["Team", "team"],
+]);
+
+
+const registrants = new Array(AMOUNT_REGISTRANTS);
+for (let i = 0; i < AMOUNT_REGISTRANTS; i++) {
+  registrants[i] = {
+    [FIELD_MAP.get("eMail")]: `email${i + 1}@werace.de`,
+    [FIELD_MAP.get("Startnummer")]: `${i + 1}`,
+    [FIELD_MAP.get("Starterklasse")]: "Männer",
+    [FIELD_MAP.get("Name")]: `Firstname ${i + 1}`,
+    [FIELD_MAP.get("Nachname")]: `Lastname ${i + 1}`,
+    [FIELD_MAP.get("Team")]: `Team ${i + 1}`,
+  };
+}
+
+describe("Parse Features Test", () => {
+  let parseClient, sessionToken, wrEvent, subscription;
+
+  beforeAll(async () => {
+    // Initialize Parse
+    Parse.serverURL = PARSE_SERVER_URL;
+    Parse.initialize(PARSE_APP_ID, PARSE_JAVASCRIPT_ID, PARSE_MASTER_KEY);
+
+    // Initialize ParseClient
+    parseClient = new Parse.LiveQueryClient({
+      applicationId: PARSE_APP_ID,
+      serverURL: PARSE_WSS_URL,
+      javascriptKey: PARSE_JAVASCRIPT_ID,
+    });
+    parseClient.open();
+
+    // Delete TestUser Accounts
+    await deleteEvent(EVENT_NAME);
+    /* timekeeper users should be deleted automatically with event deletion*/
+    await deleteUser(TIMEKEEPER_START_PIN);
+    await deleteUser(TIMEKEEPER_TARGET_PIN);
+    await deleteUser("TestOrganizer");
+  });
+
+  it("Create OrganizerUser()", async () => {
+    let user = await createUser({
+      username: "TestOrganizer",
+      password: "TestOrganizer",
+      email: "TestOrganizer@werace.de",
+    });
+    user = await getUser(user.objectId);
+    await assignUserTo_wrOrganizer_Role(user);
+    expect(user.username).toEqual("TestOrganizer");
+  });
+
+  it("Create wrEvent", async () => {
+    wrEvent = await new Parse.Object("WR_EVENT").save({
+      eventName: EVENT_NAME,
+      tecName: EVENT_NAME,
+      eventStagesGroup: {
+        eventStagesArea: {
+          stageType: STAGE_TYPE,
+          stagePhone: "+49 123456789",
+          eventStagesTable: [
+            {
+              stageName: STAGE_NAME,
+              tryCount: STAGE_TRY_COUNT,
+              resultKeeping: RESULTKEEPING,
+              timeKeeperStartPin: TIMEKEEPER_START_PIN,
+            },
+          ],
+        },
+      },
+      createdBy: await Parse.User.logIn("TestOrganizer", "TestOrganizer"),
+      registrants: registrants,
+    });
+    expect(wrEvent.get("eventName")).toEqual(EVENT_NAME);
+  });
+
+  it("Create Start-TimeKeeperUser(wrEvent)", async () => {
+    const user = await getUser(
+      (
+        await createUser({
+          username: TIMEKEEPER_START_PIN,
+          password: TIMEKEEPER_START_PIN,
+          email: `${TIMEKEEPER_START_PIN}@werace.de`,
+          usertype: {
+            type: "event",
+            id: wrEvent.id,
+            mode: "MODE_ONLY_STARTTIME",
+            eventName: EVENT_NAME,
+            stage: STAGE_NAME,
+            stageTryCount: STAGE_TRY_COUNT,
+          },
+        })
+      ).objectId
+    );
+    expect(user.username).toEqual(TIMEKEEPER_START_PIN);
+  });
+
+  it("Create FINISH-TimeKeeperUser(wrEvent)", async () => {
+    const user = await getUser(
+      (
+        await createUser({
+          username: TIMEKEEPER_TARGET_PIN,
+          password: TIMEKEEPER_TARGET_PIN,
+          email: `${TIMEKEEPER_TARGET_PIN}@werace.de`,
+          usertype: {
+            type: "event",
+            id: wrEvent.id,
+            mode: "MODE_ONLY_STOPTIME",
+            eventName: EVENT_NAME,
+            stage: STAGE_NAME,
+            stageTryCount: STAGE_TRY_COUNT,
+          },
+        })
+      ).objectId
+    );
+    expect(user.username).toEqual(TIMEKEEPER_TARGET_PIN);
+  });
+
+  // it("Login User", async () => {
+  //   const user = await Parse.User.logIn("111111", "111111");
+  //   sessionToken = user.get("sessionToken");
+  //   expect(sessionToken).toBeTypeOf("string");
+  // });
+
+  it("Subscribe ParseClient for WR_EVENT", () => {
+    let query = new Parse.Query("WR_EVENT");
+    query.equalTo("objectId", WR_EVENT.id);
+    subscription = parseClient.subscribe(query, sessionToken);
+
+    subscription.on("create", (sn) => {
+      console.log("StartNumber was created:" + sn);
+    });
+    subscription.on("delete", (sn) => {
+      // StartNumber was deleted
+    });
+    expect(Array.from(parseClient.subscriptions)).toBeDefined();
+  });
+});
+
+/** FURTHER TESTS
+ * (1) Logon Timekeeper and check if SessionObserver is created
+ * (2) Delete TimeKeeper and check if SessionObserver is deleted
+ */

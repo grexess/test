@@ -1,0 +1,36 @@
+{
+  "name": "vite-vue-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest --dom",
+    "copy": "npx copyfiles -u 1 dist/**/* ../wr2024-CloudFunctions/public/timer",
+    "clean": "npx rimraf ../wr2024-CloudFunctions/public/timer/* --glob",
+    "deploy": "npm run build && npm run clean && npm run copy && cd ../wr2024-CloudFunctions && b4a deploy"
+  },
+  "dependencies": {
+    "@asika32764/vue-animate": "^3.0.2",
+    "@vue/compiler-sfc": "^3.4.13",
+    "moment": "^2.29.4",
+    "parse": "^4.2.0",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.0",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5",
+    "vuetify": "^3.4.0"
+  },
+  "devDependencies": {
+    "@mdi/font": "^7.2.96",
+    "@pinia/testing": "^0.1.3",
+    "@testing-library/vue": "^8.0.0",
+    "@vitejs/plugin-vue": "^5",
+    "@vue/test-utils": "^2.4.3",
+    "happy-dom": "^13",
+    "vite": "^5",
+    "vitest": "^1"
+  }
+}

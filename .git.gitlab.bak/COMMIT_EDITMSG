@@ -1,0 +1,25 @@
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch main
+# Your branch is up to date with 'origin/main'.
+#
+# Changes to be committed:
+#	renamed:    .env.bak -> .env.production
+#	modified:   .vscode/settings.json
+#	modified:   README.md
+#	modified:   src/App.vue
+#	modified:   src/components/renderless/CRUDRecords.vue
+#	modified:   src/components/startPage/NumberSelection.vue
+#	modified:   src/components/startPage/StartTime.vue
+#	modified:   src/config/config.js
+#	modified:   src/scripts/parseFunctions.js
+#	modified:   src/scripts/router.js
+#	modified:   src/scripts/stores/timer.store.js
+#	modified:   src/style.css
+#	modified:   src/views/LoginPage.vue
+#	modified:   src/views/PopupCreationPage.vue
+#	modified:   src/views/StartPage.vue
+#	modified:   vite.config.js
+#
