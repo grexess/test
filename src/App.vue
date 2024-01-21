@@ -4,6 +4,8 @@ import { storeToRefs } from "pinia";
 import { useTimerStore } from "@/scripts/stores/index.js";
 import { useRoute } from "vue-router";
 
+import Footer from "@/components/framework/Footer.vue";
+
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import InfoDialog from "@/components/dialogs/InfoDialog.vue";
 import SnackBar from "@/components/dialogs/SnackBar.vue";
@@ -107,6 +109,8 @@ const getTargetLabel = () => {
     <SnackBar ref="snackBar" />
     <LoadingComponent ref="loadingComponent" />
     <CRUDComponent ref="crud" />
+
+    <Footer :app="true" v-if="!timerStore.user" />
   </v-app>
 </template>
 

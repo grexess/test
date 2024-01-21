@@ -64,15 +64,6 @@ const doLogin = async () => {
         () => timerStore.callParseFunction("logoutConcurrentUser", { userName: pin.value }),
         { obj: "Logout" }
       );
-      // try {
-      //   await timerStore.logoutConcurrentUser(pin.value);
-      // } catch (error) {
-      //   infoDialog.open({
-      //     title: "Fehler",
-      //     text: error.message || error,
-      //     color: "red",
-      //   });
-      // }
       doLogin();
     }
   } finally {
@@ -84,10 +75,10 @@ const doLogin = async () => {
 <template>
   <v-container class="fill-height justify-center">
     <v-card max-width="300px">
-      <v-card-title class="bg-blue">Zeitnahme-PIN eingeben</v-card-title>
+      <v-card-title class="bg-wrDarkGreen">Zeitnahme-PIN eingeben</v-card-title>
       <v-card-text class="mt-4 pb-0">
         <v-row align-center>
-          <v-col v-for="d in digits" class="text-center">
+          <v-col v-for="d in digits" :key="d" class="text-center">
             <v-btn @click="addDigit(d)">{{ d }}</v-btn>
           </v-col>
         </v-row>
@@ -98,12 +89,12 @@ const doLogin = async () => {
               <template v-slot:prepend> <v-icon icon="mdi-close" @click="clearPin()" /> </template>
               <template v-slot:append>
                 <v-icon icon="mdi-keyboard-backspace" @click="removeDigit()" /> </template></v-text-field></v-col></v-row
-        ><v-divider class="ma-4"></v-divider>
+        ><v-divider v-if="pin.length === 5" class="ma-4"></v-divider>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <transition name="roll">
-          <v-btn size="large" v-if="pin.length === 5" @click="doLogin" variant="tonal" color="blue">Zur Zeitnahme</v-btn>
+          <v-btn size="large" v-if="pin.length === 5" @click="doLogin" variant="tonal" color="wrDarkGreen">Zur Zeitnahme</v-btn>
         </transition>
         <v-spacer />
       </v-card-actions>

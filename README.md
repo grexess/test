@@ -11,7 +11,7 @@ TimeKeeper requires role **wrTimeKeeper** which grants Read/Write access to resu
 |        Class        |                    Description                     |       LiveQuery        |
 | :-----------------: | :------------------------------------------------: | :--------------------: |
 |      WR_EVENT       |            WeRace **Event** Description            | YES (Add StartNumber)  |
-|      WR_POPUP       |            WeRace **Event** Description            |           NO           |
+|      WR_POPUP       |            WeRace **POPUP** Description            |           NO           |
 | WR_EVENT_TIMETABLE  |            Stores results for WR_EVENT             | YES (Start/Reset/Stop) |
 | WR_POPUP_TIMETABLE  |            Stores results for WR_POPUP             | YES (Start/Reset/Stop) |
 | WR_SESSION_OBSERVER | Used for identification for TimeKeeper counterpart |   YES (Counterpart)    |
